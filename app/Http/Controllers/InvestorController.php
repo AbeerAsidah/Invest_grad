@@ -8,12 +8,11 @@ use Illuminate\Http\Request;
 
 class InvestorController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+   
     public function index()
     {
-        //
+        $Investor = InvestorResource::collection(Investor::get());
+        return $this->apiResponse($Investor, 'ok', 200);
     }
 
     /**

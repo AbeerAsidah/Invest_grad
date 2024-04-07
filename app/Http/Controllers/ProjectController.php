@@ -8,43 +8,85 @@ use Illuminate\Http\Request;
 
 class ProjectController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    use  ApiResponseTrait;
+
     public function index()
     {
-        //
+        $Project = ProjectResource::collection(Project::get());
+        return $this->apiResponse($Project, 'ok', 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    
     public function store(Request $request)
     {
-        //
+        
+        $input=$request->all();
+        $validator = Validator::make( $input, [
+            'description' => 'required',
+            'feasibility_study' => 'required',
+            'amount' => 'required',
+            'location' => 'required',
+            'investor_id' => 'required',
+            'type_id' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return $this->apiResponse(null, $validator->errors(), 400);
+        }
+        $Project = Project::query()->create([
+            'description' => $request->description,
+            'feasibility_study' => $request->feasibility_study,
+            'amount' => $request->amount,
+            'location' => $request->location,
+            'investor_id' => $request->investor_id,
+            'user_id' => Auth::id(),
+            'type_id' => $request->type_id,
+        ]);
+
+        if ($Project) {
+            return $this->apiResponse(new ProjectResource($Project), 'the Project save', 201);
+        }
+        return $this->apiResponse(null, 'the Project  not save', 400);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Project $project)
+   
+    public function show( $id)
     {
-        //
+        $Project= Project::find($id);
+        if($Project){
+            return $this->apiResponse(new ProjectResource($Project) , 'ok' ,200);
+        }
+        return $this->apiResponse(null ,'the Project not found' ,404);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Project $project)
+    
+    public function update(Request $request,  $id)
     {
-        //
+        $Project= Project::find($id);
+        if(!$Project)
+        {
+            return $this->apiResponse(null ,'the Project not found ',404);
+        }
+        if($Project->user_id !=Auth::id()){
+            return $this->apiResponse(null, 'you do not have rights', 400);
+        }
+        $Project->update($request->all());
+        if($Project)
+        {
+            return $this->apiResponse(new ProjectResource($Project) , 'the Project update',201);
+
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Project $project)
+  
+    public function destroy( $id)
     {
-        //
+        $Project =  Project::find($id);
+
+        if(!$Project){
+            return $this->apiResponse(null, 'This Project not found', 404);
+        }
+
+        $Project->delete($id);
+            return $this->apiResponse(null, 'This Project deleted', 200);
     }
 }

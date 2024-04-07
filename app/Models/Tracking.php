@@ -8,4 +8,21 @@ use Illuminate\Database\Eloquent\Model;
 class Tracking extends Model
 {
     use HasFactory;
+
+    
+    protected $table = "projects";
+
+    protected $fillable = ['earning','cost','tax','outcome','resources_change','project_id',];
+
+    protected $primaryKey = "id";
+    public $timestamps = true ;
+
+
+
+    public function project(){
+        return $this->belongsTo(User::class,'project_id');
+    }
+
+
+
 }

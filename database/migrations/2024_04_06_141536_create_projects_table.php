@@ -19,7 +19,7 @@ return new class extends Migration
             $table->text('location');
 
             $table->foreignId('investor_id')->constrained('investors')->cascadeOnDelete();
-            $table->foreignId('enterpneur_id')->constrained('enterpneurs')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('type_id')->constrained('types')->cascadeOnDelete();
             $table->timestamps();
         });
