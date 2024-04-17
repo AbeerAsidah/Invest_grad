@@ -32,6 +32,29 @@ Route::group( ['prefix' =>'user','middleware' => ['auth:user-api','scopes:user']
     Route::get('logout',[PassportAuthController::class,'logout'])->name('userLogout');
 
 
+
+//Project
+Route::prefix("projects")->group(function (){
+  Route::get('/',[\App\Http\Controllers\ProjectController::class,'index']);
+  Route::post('/',[\App\Http\Controllers\ProjectController::class,'store']);
+  Route::get('/{id}',[\App\Http\Controllers\ProjectController::class,'show']);
+  Route::post('update/{id}',[\App\Http\Controllers\ProjectController::class,'update']);
+  Route::post('delete/{id}',[\App\Http\Controllers\ProjectController::class,'destroy']);
+});
+
+
+
+//Complaint
+Route::prefix("complaints")->group(function (){
+
+  Route::post('/',[\App\Http\Controllers\ComplaintController::class,'store']);
+  Route::post('update/{id}',[\App\Http\Controllers\ComplaintController::class,'update']);
+  Route::post('delete/{id}',[\App\Http\Controllers\ComplaintController::class,'destroy']);
+});
+
+
+
+
 });
 
 

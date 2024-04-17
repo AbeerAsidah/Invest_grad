@@ -8,43 +8,75 @@ use Illuminate\Http\Request;
 
 class TrackingController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    
     public function index()
     {
-        //
+        $Tracking = TrackingResource::collection(Tracking::get());
+        return $this->apiResponse($Tracking, 'ok', 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    
     public function store(Request $request)
     {
-        //
+        $input=$request->all();
+        $validator = Validator::make( $input, [
+            'earning' => 'required',
+            'cost' => 'required',
+            'tax' => 'required',
+            'outcome' => 'required',
+            'resources_change' => 'required',
+            'project_id' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return $this->apiResponse(null, $validator->errors(), 400);
+        }
+
+        $Tracking =Tracking::create($request->all());
+
+        if ($Tracking) {
+            return $this->apiResponse(new TrackingResource($Tracking), 'the Tracking  save', 201);
+        }
+        return $this->apiResponse(null, 'the Tracking  not save', 400);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Tracking $tracking)
+ 
+    public function show( $id)
     {
-        //
+        $Tracking= Tracking::find($id);
+        if($Tracking){
+            return $this->apiResponse(new TrackingResource($Tracking) , 'ok' ,200);
+        }
+        return $this->apiResponse(null ,'the Tracking not found' ,404);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Tracking $tracking)
+    
+    public function update(Request $request,  $id)
     {
-        //
+        $Tracking= Tracking::find($id);
+        if(!$Tracking)
+        {
+            return $this->apiResponse(null ,'the Tracking not found ',404);
+        }
+
+        $Tracking->update($request->all());
+        if($Tracking)
+        {
+            return $this->apiResponse(new TrackingResource($Tracking) , 'the Tracking update',201);
+
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Tracking $tracking)
+    
+    public function destroy( $id)
     {
-        //
+        $Tracking =  Tracking::find($id);
+
+        if(!$Tracking){
+            return $this->apiResponse(null, 'This Tracking not found', 404);
+        }
+
+        $Tracking->delete($id);
+            return $this->apiResponse(null, 'This Tracking deleted', 200);
     }
+    
 }

@@ -8,43 +8,72 @@ use Illuminate\Http\Request;
 
 class ComplaintController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    use  ApiResponseTrait;
+
     public function index()
     {
-        //
+        $Complaint = ComplaintResource::collection(Complaint::get());
+        return $this->apiResponse($Complaint, 'ok', 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+
     public function store(Request $request)
     {
-        //
+        $input=$request->all();
+        $validator = Validator::make( $input, [
+            'description' => 'required',
+            'project_id' => 'required',
+            'investor_id' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return $this->apiResponse(null, $validator->errors(), 400);
+        }
+
+        $Complaint =Complaint::create($request->all());
+
+        if ($Complaint) {
+            return $this->apiResponse(new ComplaintResource($Complaint), 'the Complaint  save', 201);
+        }
+        return $this->apiResponse(null, 'the Complaint  not save', 400);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Complaint $complaint)
+   
+    public function show( $id)
     {
-        //
+        $Complaint= Complaint::find($id);
+        if($Complaint){
+            return $this->apiResponse(new ComplaintResource($Complaint) , 'ok' ,200);
+        }
+        return $this->apiResponse(null ,'the Complaint not found' ,404);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Complaint $complaint)
+   
+    public function update(Request $request, $id)
     {
-        //
+        $Complaint= Complaint::find($id);
+        if(!$Complaint)
+        {
+            return $this->apiResponse(null ,'the Complaint not found ',404);
+        }
+
+        $Complaint->update($request->all());
+        if($Complaint)
+        {
+            return $this->apiResponse(new ComplaintResource($Complaint) , 'the Complaint update',201);
+
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Complaint $complaint)
+   
+    public function destroy( $id)
     {
-        //
+        $complaint =  Complaint::find($id);
+
+        if(!$complaint){
+            return $this->apiResponse(null, 'This Complaint not found', 404);
+        }
+
+        $complaint->delete($id);
+            return $this->apiResponse(null, 'This complaint deleted', 200);
     }
 }
