@@ -158,4 +158,92 @@ class PassportAuthController extends Controller
 
     }
 
+
+
+    
+    ///Investor
+    public function registerInvestor(Request $request)
+    {
+        $validator = Validator::make($request->all(),[
+            'first_name' => [ 'required' , 'string','min:3'],
+            'last_name' => [ 'required' , 'string','min:3'],
+            'email' => ['required', 'string', 'email', 'max:255' ,'unique:users',],
+            'password' => ['required', 'string', 'min:8'],
+            'phone' => ['required', 'string'],
+            'location' => ['required', 'text'],
+            'iD_card' => ['required', 'text'],
+            'personal_photo' => ['required', 'text'],
+         
+        ]);
+
+        if ($validator->fails()) {
+            return response(['errors' => $validator->errors()->all()], 401);
+        }
+
+        $request['password'] = Hash::make($request['password']);
+
+        $investor = Investor::create([
+            'first_name'=> $request->first_name,
+            'last_name'=> $request->last_name,
+            'email' => $request->email,
+            'password' => $request->password,
+            'phone' => $request->phone,
+            'location' => $request->location,
+            'iD_card' => $request->iD_card,
+            'personal_photo' => $request->personal_photo,
+        ]);
+
+        if ($tokenResult = $investor->createToken('Personal Access Token')) {
+            $data["message"] = 'User successfully registered';
+            $data["user_type"] = 'investor';
+            $data["investor"] = $investor;
+            $data["token_type"] = 'Bearer';
+            $data["access_token"] = $tokenResult->accessToken;
+
+            return response()->json($data, Response::HTTP_OK);
+        }
+
+        return response()->json(['error' => ['Email and Password are wrong.']], 401);
+    }
+
+
+
+
+    public function LoginInvestor(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        if($validator->fails()){
+            return response()->json(['error' => $validator->errors()->all()]);
+        }
+        if(auth()->guard('investor')->attempt(['email' => request('email'), 'password' => request('password')])){
+
+            config(['auth.guards.api.provider' => 'investor']);
+            $investor = investor::select('investors.*')->find(auth()->guard('investor')->user()->id);
+            $success =  $investor;
+            $success["user_type"] = 'investor ';
+            $success['token'] =  $investor->createToken('MyApp',['investor'])->accessToken;
+
+            return response()->json($success, 200);
+        }else{
+            return response()->json(['error' => ['Email and Password are Wrong.']], 401);
+        }
+    }
+
+
+
+
+    public function logoutInvestor(Request $request)
+    {
+        Auth::guard('investor-api')->user()->token()->revoke();
+        return response()->json([
+            'message' => 'Successfully logged out'
+        ]);
+    }
+
+
 }

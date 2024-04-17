@@ -70,6 +70,19 @@ return [
             'provider' => 'admins',
         ],
 
+
+
+
+        'investor' => [
+            'driver' => 'session',
+            'provider' => 'investors',
+        ],
+
+        'investor-api' => [
+            'driver' => 'passport',
+            'provider' => 'investors',
+        ],
+
     ],
 
     /*
@@ -104,6 +117,12 @@ return [
         'admins' => [
             'driver' => 'eloquent',
             'model' => App\Models\Admin::class,
+        ],
+
+
+        'investors' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Investor::class,
         ],
     ],
 

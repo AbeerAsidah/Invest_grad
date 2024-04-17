@@ -25,29 +25,33 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 
-Route::post('user/register', [PassportAuthController::class, 'register'])->name('register');
-Route::post('user/login', [PassportAuthController::class, 'userLogin'])->name('userLogin');
 
-
+Route::post('investor/register', [PassportAuthController::class, 'registerInvestor'])->name('registerInvestor');
+Route::post('investor/login', [PassportAuthController::class, 'LoginInvestor'])->name('LoginInvestor');
 
 Route::group( ['prefix' =>'user','middleware' => ['auth:user-api','scopes:user'] ],function(){
    // authenticated staff routes here
 
 //    Route::get('dashboard',[PassportAuthController::class, 'userDashboard']);
-    Route::get('logout',[PassportAuthController::class,'logout'])->name('userLogout');
+    Route::get('logout',[PassportAuthController::class,'logoutInvestor'])->name('logoutInvestor');
 
 
 
 //Project
 Route::prefix("projects")->group(function (){
   Route::get('/',[\App\Http\Controllers\ProjectController::class,'index']);
-  Route::post('/',[\App\Http\Controllers\ProjectController::class,'store']);
   Route::get('/{id}',[\App\Http\Controllers\ProjectController::class,'show']);
-  Route::post('update/{id}',[\App\Http\Controllers\ProjectController::class,'update']);
-  Route::post('delete/{id}',[\App\Http\Controllers\ProjectController::class,'destroy']);
 });
 
 
+
+//Complaint
+Route::prefix("complaints")->group(function (){
+
+  Route::post('/',[\App\Http\Controllers\ComplaintController::class,'store']);
+  Route::post('update/{id}',[\App\Http\Controllers\ComplaintController::class,'update']);
+  Route::post('delete/{id}',[\App\Http\Controllers\ComplaintController::class,'destroy']);
+});
 
 
 
