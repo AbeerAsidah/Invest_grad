@@ -15,13 +15,49 @@ use Laravel\Passport\HasApiTokens;
 use Laravel\Passport\RefreshToken;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Validation\Rule;
+use App\Traits\ApiResponseTrait;
 
 class PassportAuthController extends Controller
 {
     use  ApiResponseTrait;
 
 
+    //Admin_auth
+    public function adminLogin(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+        if($validator->fails()){
+            $errors = $validator->errors()->all();
+            return $this->apiResponse($errors, 'Validation Error', 422);
+            // return response()->json(['error' => $validator->errors()->all()]);
+        }
+        if(auth()->guard('admin')->attempt(['email' => request('email'), 'password' => request('password')])){
+            config(['auth.guards.api.provider' => 'admin']);
+            $admin = Admin::select('admins.*')->find(auth()->guard('admin')->user()->id);
+            $success =  $admin;
+            $success['token'] =  $admin->createToken('MyApp',['admin'])->accessToken;
 
+            return $this->apiResponse($success, 'success', 200);
+        }else{
+            return $this->apiResponse(null, ['error' => ['Email and Password are Wrong.']], 200);
+        }
+    }
+
+    public function adminlogout(Request $request)
+    {
+        $token=$request->user()->token();
+        $token->revoke();
+        return response()->json([  'message' => 'Successfully logged out' ]);
+    }
+
+
+
+
+
+    //user_auth
 
     public function register(Request $request){
 
@@ -78,42 +114,6 @@ class PassportAuthController extends Controller
 
 
 
-
-    public function adminLogin(Request $request)
-    {
-
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-
-        if($validator->fails()){
-            return response()->json(['error' => $validator->errors()->all()]);
-        }
-        if(auth()->guard('admin')->attempt(['email' => request('email'), 'password' => request('password')])){
-
-            config(['auth.guards.api.provider' => 'admin']);
-            $admin = Admin::select('admins.*')->find(auth()->guard('admin')->user()->id);
-            $success =  $admin;
-            $success['token'] =  $admin->createToken('MyApp',['admin'])->accessToken;
-
-            return response()->json($success, 200);
-        }else{
-            return response()->json(['error' => ['Email and Password are Wrong.']], 401);
-        }
-    }
-
-
-
-
-    public function adminlogout(Request $request)
-    {
-        $token=$request->user()->token();
-        $token->revoke();
-        return response()->json([
-            'message' => 'Successfully logged out'
-        ]);
-    }
 
 
     
