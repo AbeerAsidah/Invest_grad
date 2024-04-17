@@ -28,7 +28,12 @@ class InvestorController extends Controller
      */
     public function show(Investor $investor)
     {
-        //
+        $Investor= Investor::find($id);
+        if($Investor){
+            return $this->apiResponse(new InvestorResource($Investor) , 'ok' ,200);
+        }
+        return $this->apiResponse(null ,'the Investor not found' ,404);
+   
     }
 
     /**
